@@ -26,7 +26,10 @@ const entry =
   "rating.";
 
 // Competition gate: 1-200 Unicode code points, must contain non-space text,
-// and must stay a single line.
+// and must stay a single line. It must also carry no leading or trailing
+// whitespace (wasted characters that would also make the stored line look
+// sloppy next to other reviews) and no control characters, which a rating
+// site would strip or render oddly.
 function validateEntry(text: string): number {
   const length = Array.from(text).length;
   if (length < 1 || length > 200) {
@@ -37,6 +40,12 @@ function validateEntry(text: string): number {
   }
   if (text.includes("\n") || text.includes("\r")) {
     throw new Error("entry must be a single line");
+  }
+  if (text !== text.trim()) {
+    throw new Error("entry must not start or end with whitespace");
+  }
+  if (/[\u0000-\u001F\u007F]/.test(text)) {
+    throw new Error("entry must not contain control characters");
   }
   return length;
 }
